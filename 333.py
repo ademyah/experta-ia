@@ -304,8 +304,26 @@ def afficher_profil():
 
     profil_dialog.exec()
 
+
+    # Ajoutez cette classe pour afficher le graphique
+class FigureCanvasMatplotlib(FigureCanvas):
+    def __init__(self, parent=None):
+        self.fig, self.ax = plt.subplots()
+        super().__init__(self.fig)
+        self.setParent(parent)
+
+    def plot_data(self, dates, poids_values):
+        self.ax.clear()
+        self.ax.plot(dates, poids_values, marker='o', color='b', label="Poids")
+        self.ax.set_xlabel('Dates')
+        self.ax.set_ylabel('Poids (kg)')
+        self.ax.set_title('Évolution du poids au fil du temps')
+        self.ax.legend()
+        self.draw()
+
 # Fonction pour soumettre les données et afficher les résultats
 def submit_choices():
+      # Récupération des valeurs
     objectif = objectif_combobox.currentText()
     niveau = niveau_combobox.currentText()
     poids = poids_input.text()
@@ -357,14 +375,23 @@ def submit_choices():
     # Fenêtre des résultats
     result_dialog = QDialog(window)
     result_dialog.setWindowTitle("Conseils d'Entraînement")
-    result_dialog.setFixedSize(700, 600)  # Augmenter la largeur
+    result_dialog.setFixedSize(700, 600)
 
     layout = QVBoxLayout(result_dialog)
     layout.addWidget(QLabel(f"IMC : {imc} ({etat_imc})"))
     layout.addWidget(QLabel(f"Eau recommandée : {eau_recommandee} litres/jour"))
     layout.addWidget(QLabel(f"Conseils d'entraînement :\n{conseils}"))
     layout.addWidget(QLabel(f"Conseils Nutritionnels : {conseils_nutrition}"))
+
+    # Affichage du graphique de poids
+    # Liste des dates et poids (exemple, vous pouvez les récupérer dynamiquement)
+    dates = ['01/01', '01/02', '01/03', '01/04', '01/05']
+    poids_values = [70, 69, 68, 67, 66]  # Exemple de valeurs de poids
     
+    canvas = FigureCanvasMatplotlib(result_dialog)
+    layout.addWidget(canvas)
+    canvas.plot_data(dates, poids_values)
+
     # Bouton pour sauvegarder les conseils
     save_button = QPushButton("Sauvegarder")
     save_button.clicked.connect(
